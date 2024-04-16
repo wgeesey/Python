@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# William Geesey
+# M9_Lab1.py
+# query data from a SQL Server DB
+
 import pyodbc
 
 # Function to create a new database

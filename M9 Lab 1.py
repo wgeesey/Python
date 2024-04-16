@@ -6,22 +6,17 @@
 import pyodbc
 
 # Function to create a new database
-def createdb(conn, dbname, sqlserver = True):
+def createdb(conn, dbname):
     """ create db using conn, name, and sqlserver parameters
         parameters:
             conn: open connection
-            name: database name
-            sqlserver: if True (default), sets AUTO_CLOSE to OFF"""
+            dbname: database name"""
     # if it already exists, drop the database
     stmt = 'IF DB_ID(\''+ dbname +'\') IS NOT NULL DROP DATABASE '+ dbname
     conn.execute(stmt)
     # create the database
-    stmt = 'CREATE DATABASE ' + dbname
-    conn.execute(stmt)
-    if (sqlserver == True):
-        # turn off auto-close so DB isn't taken offline
-        # (this is SQL Server-specific)
-        conn.execute('ALTER DATABASE ' + dbname + ' SET AUTO_CLOSE OFF')
+    conn.execute('CREATE DATABASE ' + dbname)
+    conn.execute('ALTER DATABASE ' + dbname + ' SET AUTO_CLOSE OFF')
         
     print(f'Database: {dbname} created.')
 
@@ -45,15 +40,11 @@ def createtable(conn, tablename):
 # Function to insert data into a table
 def createdata(conn, tablename):
     # create SQL script to insert a row
-    insertRow1SQL = 
-        "INSERT INTO " + tablename + "VALUES ('A10001', 'Smith', 'John', '1 Elm St.,',
-        'Jacksonville', 'FL', '32242')"
-    insertRow2SQL =
-        "INSERT INTO " + tablename + "VALUES ('B10002', 'Brown', 'Sally', '3 Oak St.,',
-        'Orlando', 'FL', '32806')"
     
-    conn.execute(insertRow1SQL)
-    conn.execute(insertRow2SQL)
+    conn.execute("INSERT INTO " + tablename + 
+        " VALUES ('A10001', 'Smith', 'John', '1 Elm St.,', 'Jacksonville', 'FL', '32242')")
+    conn.execute("INSERT INTO " + tablename + 
+        " VALUES ('B10002', 'Brown', 'Sally', '3 Oak St.,', 'Orlando', 'FL', '32806')")
 
     print('Data inserted.')
 
@@ -103,19 +94,22 @@ def dropdb(conn, dbname):
 
 # Main function
 def main():
+    dataB = "Module9"
+    table = dataB + ".dbo.table1"
     try:
         conn = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};'
             'SERVER=localhost;'
-            'Trusted_Connection=yes;'
-            autocommit = TRUE
+            'Trusted_Connection=yes;',  # use Windows Authentication
+            autocommit = True
         )
-        createdb(conn, "test_db")
-        createtable(conn, "test_table")
-        createdata(conn, "test_table")
-        deletedata(conn, "test_table")
-        droptable(conn, "test_table")
-        dropdb(conn, "test_db")
+        createdb(conn, dataB)
+        createtable(conn, table)
+        createdata(conn, table)
+        querydata(conn, table)
+        deletedata(conn, table)
+        droptable(conn, table)
+        dropdb(conn, dataB)
         conn.close()
     except pyodbc.Error as e:
         print("Error connecting to SQL Server:", e)
